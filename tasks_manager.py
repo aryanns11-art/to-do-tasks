@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import messagebox
 import os
 
 FILE = "tasks.txt"
@@ -15,58 +17,101 @@ def save_tasks(tasks):
         for task in tasks:
             f.write(task + "\n")
 
-def show_tasks(tasks):
-    if not tasks:
-        print("No tasks found.")
-    else:
-        print("\nYour Tasks:")
-        for i, task in enumerate(tasks):
-            print(f"{i}. {task}")
+# Add task
+def add_task():
+    task = task_entry.get()
 
-def add_task(tasks):
-    task = input("Enter new task: ")
-    tasks.append(task)
-    save_tasks(tasks)
-    print("Task added.")
-
-def del_tasks(tasks):
-    show_tasks(tasks)
-
-    try:
-        index = int(input("Enter the task number to delete :"))
-        if index < 0 or index >= len(tasks):
-            print("Invalid task number !")
-            return
-        removed_task = tasks.pop(index)
+    if task != "":
+        tasks.append(task)
         save_tasks(tasks)
-        print(f"Task '{removed_task}' deleted successfully !")
-    except ValueError:
-        print("Please enter a valid number !")
 
-def main():
-    tasks = load_tasks()
+        listbox.insert(tk.END, task)
+        task_entry.delete(0, tk.END)
+    else:
+        messagebox.showwarning("Warning", "Task cannot be empty!")
 
-    while True:
-        print("\n--- TO-DO LIST ---")
-        print("1. View Tasks")
-        print("2. Add Task")
-        print("3. Delete Task")
-        print("4. Exit")
+# Delete selected task
+def delete_task():
+    try:
+        selected = listbox.curselection()[0]
 
-        choice = input("Choose: ")
-        
-        match choice:
-            case "1":
-                show_tasks(tasks)
-            case "2":
-                add_task(tasks)
-            case "3":
-                del_tasks(tasks)
-            case "4":
-                print("Goodbye!")
-                break
-            case _:
-                print("Invalid choice.")
+        removed = tasks.pop(selected)
+        save_tasks(tasks)
 
-if __name__ == "__main__":
-    main()
+        listbox.delete(selected)
+
+        messagebox.showinfo("Deleted", f"Deleted: {removed}")
+
+    except:
+        messagebox.showwarning("Warning", "Please select a task.")
+
+# Load existing tasks
+tasks = load_tasks()
+
+# Main window
+root = tk.Tk()
+root.title("To-Do List") 
+root.geometry("400x500")
+root.resizable(False, False)
+
+# Title
+title = tk.Label(
+    root,
+    text="TO-DO LIST",
+    font=("Arial", 20, "bold")
+)
+title.pack(pady=10)
+
+# Entry box
+task_entry = tk.Entry(
+    root,
+    font=("Arial", 14),
+    width=25
+)
+task_entry.pack(pady=10)
+
+# Add button
+add_button = tk.Button(
+    root,
+    text="Add Task",
+    font=("Arial", 12),
+    width=15,
+    command=add_task
+)
+add_button.pack(pady=5)
+
+# Task list
+listbox = tk.Listbox(
+    root,
+    font=("Arial", 14),
+    width=35,
+    height=12
+)
+listbox.pack(pady=10)
+
+# Insert saved tasks into listbox
+for task in tasks:
+    listbox.insert(tk.END, task)
+
+# Delete button
+delete_button = tk.Button(
+    root,
+    text="Delete Task",
+    font=("Arial", 12),
+    width=15,
+    command=delete_task
+)
+delete_button.pack(pady=5)
+
+# Exit button
+exit_button = tk.Button(
+    root,
+    text="Exit",
+    font=("Arial", 12),
+    width=15,
+    command=root.destroy
+)
+exit_button.pack(pady=10)
+
+# Run app
+root.mainloop()
