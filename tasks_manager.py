@@ -2,116 +2,145 @@ import tkinter as tk
 from tkinter import messagebox
 import os
 
-FILE = "tasks.txt"
+FILE = "abcd.txt"
 
-# Load tasks from file
 def load_tasks():
     if not os.path.exists(FILE):
-        return []
-    with open(FILE, "r") as f:
-        return [line.strip() for line in f.readlines()]
-
-# Save tasks to file
+        return[]
+    with open(FILE,"r") as f :
+        return[line.strip() for line in f.readlines()]
+    
 def save_tasks(tasks):
-    with open(FILE, "w") as f:
+    with open(FILE,"w") as f:
         for task in tasks:
             f.write(task + "\n")
 
-# Add task
-def add_task():
-    task = task_entry.get()
-
-    if task != "":
+def add_tasks():
+    task=task_entry.get()
+    if task!="":
         tasks.append(task)
         save_tasks(tasks)
 
-        listbox.insert(tk.END, task)
-        task_entry.delete(0, tk.END)
+        listbox.insert(tk.END,"✔ " + task)
+        task_entry.delete(0,tk.END)
+
     else:
-        messagebox.showwarning("Warning", "Task cannot be empty!")
+        messagebox.showwarning("Warning","Task cannot be empty !")    
 
-# Delete selected task
-def delete_task():
+def delete_tasks():
     try:
-        selected = listbox.curselection()[0]
-
-        removed = tasks.pop(selected)
+        selected=listbox.curselection()[0]
+        tasks.pop(selected)
         save_tasks(tasks)
 
         listbox.delete(selected)
-
-        messagebox.showinfo("Deleted", f"Deleted: {removed}")
+        messagebox.showinfo("Deleted", f"Deleted: {selected}")
 
     except:
         messagebox.showwarning("Warning", "Please select a task.")
 
-# Load existing tasks
-tasks = load_tasks()
 
-# Main window
+def clear_all():
+    
+    comfirm=messagebox.askyesno("Confirm","Delete ALL tasks ?")
+    if comfirm:
+        tasks.clear()
+        save_tasks(tasks)
+        listbox.delete(0,tk.END)
+
 root = tk.Tk()
-root.title("To-Do List") 
-root.geometry("400x500")
-root.resizable(False, False)
+root.title("To-Do List")        
+root.geometry("450x550")
+root.resizable(False,False)
+root.config(bg="#f5f7fa")
 
-# Title
 title = tk.Label(
     root,
-    text="TO-DO LIST",
-    font=("Arial", 20, "bold")
+    text="📝 TO-DO LIST",
+    font=("Segoe UI", 22, "bold"),
+    bg="#f5f6fa",
+    fg="#2d3436",
+    padx=10,
+    pady=10
 )
 title.pack(pady=10)
 
-# Entry box
+input_frame = tk.Frame(root, bg="#f5f7fa")  #Frame for input and add button
+input_frame.pack(pady=10)
+
 task_entry = tk.Entry(
-    root,
-    font=("Arial", 14),
-    width=25
-)
-task_entry.pack(pady=10)
+    input_frame, 
+    font=("Segoe UI", 12), 
+    width=25, 
+    relief="solid", 
+    bd=1)
+task_entry.grid(row=0, column=0, padx=5, ipady=6)
 
-# Add button
-add_button = tk.Button(
-    root,
-    text="Add Task",
-    font=("Arial", 12),
-    width=15,
-    command=add_task
-)
-add_button.pack(pady=5)
+add_btn = tk.Button(
+    input_frame, 
+    text="Add", 
+    bg="#2ecc71", 
+    fg="white", 
+    width=8, 
+    command=add_tasks)
 
-# Task list
+add_btn.grid(row=0, column=1, padx=5)
+
+list_frame = tk.Frame(root)
+list_frame.pack(pady=15)
+
+scrollbar = tk.Scrollbar(list_frame)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
 listbox = tk.Listbox(
-    root,
-    font=("Arial", 14),
+    list_frame,
+    font=("Segoe UI", 12),
     width=35,
-    height=12
+    height=15,
+    bg="white",
+    fg="#2c3e50",
+    selectbackground="#a29bfe",
+    activestyle="none",
+    yscrollcommand=scrollbar.set
 )
-listbox.pack(pady=10)
+listbox.pack()
 
-# Insert saved tasks into listbox
+scrollbar.config(command=listbox.yview)
+
+btn_frame = tk.Frame(root, bg="#f5f7fa")
+btn_frame.pack(pady=10)
+
+delete_btn = tk.Button(
+    btn_frame, 
+    text="Delete", 
+    width=10, 
+    bg="#e74c3c", 
+    fg="white", 
+    command=delete_tasks)
+
+delete_btn.grid(row=0, column=0, padx=5)
+
+clear_btn = tk.Button(
+    btn_frame, 
+    text="Clear All", 
+    width=10, 
+    bg="#f39c12", 
+    fg="white", 
+    command=clear_all)
+
+clear_btn.grid(row=0, column=1, padx=5)
+
+exit_btn = tk.Button(
+    btn_frame, 
+    text="Exit", 
+    width=10, 
+    bg="#7f8c8d", 
+    fg="white", 
+    command=root.destroy)
+exit_btn.grid(row=0, column=2, padx=5)
+
+tasks = load_tasks()
 for task in tasks:
-    listbox.insert(tk.END, task)
+    listbox.insert(tk.END, "✔ " + task)
 
-# Delete button
-delete_button = tk.Button(
-    root,
-    text="Delete Task",
-    font=("Arial", 12),
-    width=15,
-    command=delete_task
-)
-delete_button.pack(pady=5)
-
-# Exit button
-exit_button = tk.Button(
-    root,
-    text="Exit",
-    font=("Arial", 12),
-    width=15,
-    command=root.destroy
-)
-exit_button.pack(pady=10)
-
-# Run app
 root.mainloop()
