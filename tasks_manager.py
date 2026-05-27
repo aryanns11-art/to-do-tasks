@@ -16,26 +16,32 @@ def save_tasks(tasks):
             f.write(task + "\n")
 
 def add_tasks():
-    task=task_entry.get()
-    if task!="":
-        tasks.append(task)
-        save_tasks(tasks)
+    task = task_entry.get().strip()
 
-        listbox.insert(tk.END,"✔ " + task)
-        task_entry.delete(0,tk.END)
+    if not task:
+        messagebox.showwarning("Warning", "Task cannot be empty!")
+        return
 
-    else:
-        messagebox.showwarning("Warning","Task cannot be empty !")    
+    if task in tasks:   
+        messagebox.showwarning("Duplicate", "Task already exists!")
+        return
+
+    tasks.append(task)
+    save_tasks(tasks)
+
+    listbox.insert(tk.END, "✔ " + task)   
+    task_entry.delete(0, tk.END)
+    task_entry.focus()
 
 def delete_tasks():
     try:
-        selected=listbox.curselection()[0]
-        tasks.pop(selected)
+        selected = listbox.curselection()[0]
+
+        deleted_task = tasks.pop(selected)   # get the actual task
         save_tasks(tasks)
 
         listbox.delete(selected)
-        messagebox.showinfo("Deleted", f"Deleted: {selected}")
-
+        messagebox.showinfo("Deleted Task", f"Deleted: {deleted_task}")
     except:
         messagebox.showwarning("Warning", "Please select a task.")
 
@@ -74,6 +80,7 @@ task_entry = tk.Entry(
     width=25, 
     relief="solid", 
     bd=1)
+task_entry.bind("<Return>", lambda event: add_tasks())  # just press Enter instead of clicking button
 task_entry.grid(row=0, column=0, padx=5, ipady=6)
 
 add_btn = tk.Button(
@@ -101,11 +108,11 @@ listbox = tk.Listbox(
     fg="#2c3e50",
     selectbackground="#a29bfe",
     activestyle="none",
-    yscrollcommand=scrollbar.set
+    yscrollcommand=scrollbar.set       # When the list moves (scrolls), update the scrollbar position
 )
 listbox.pack()
 
-scrollbar.config(command=listbox.yview)
+scrollbar.config(command=listbox.yview)    # When scrollbar moves → scroll the list
 
 btn_frame = tk.Frame(root, bg="#f5f7fa")
 btn_frame.pack(pady=10)
